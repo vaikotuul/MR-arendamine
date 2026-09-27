@@ -2,7 +2,7 @@
 
 ### Tech stack
 
-- Android Studio Quail 3 (2026.1.3)
+- Android Studio Quail 4 (2026.1.4)
 - Kotlin 2.4
 - Android SDK 36
 - Jetpack Compose
