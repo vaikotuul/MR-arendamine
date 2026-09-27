@@ -10,7 +10,7 @@
 ### Projekti käivitamine
 
 1. Klooni repository:
-   git clone [<repository-url>](https://github.com/vaikotuul/MR-arendamine)
+   git clone https://github.com/vaikotuul/MR-arendamine
 
 2. Ava projekt Android Studios.
 
