@@ -39,3 +39,10 @@ Asendab XML-paigutused puhta Kotlini koodiga. Oleku muutudes joonistatakse uuest
 
 ### Kotlin Flows / StateFlow
 Võimaldab reaktiivseid andmevooge tarbida ja UI olekuteks teisendada (`collectAsState()`), tagades sujuva andmevahetuse andmekihi ja kasutajaliidese vahel.
+
+## Kasutatud allikad
+Android Developers Documentation – Kotlin & Jetpack Compose guidelines
+
+JetBrains Kotlin Language Reference – Null Safety, Coroutines & Sealed Classes
+
+Android Studio & SDK 36 ametlikud väljalaskemärkmed ja arhitektuurijuhised
