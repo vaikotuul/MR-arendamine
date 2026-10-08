@@ -24,47 +24,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MobiilrTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNav()
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-
-    var message by remember {
-        mutableStateOf("Hello $name!")
-    }
-
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = message
-        )
-
-        Button(
-            onClick = {
-                message = "Hello from our app!"
-            }
-        ) {
-            Text("Click me")
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MobiilrTheme {
-        Greeting("Android")
-    }
-}
