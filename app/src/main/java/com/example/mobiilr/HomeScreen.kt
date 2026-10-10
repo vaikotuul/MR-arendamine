@@ -1,9 +1,5 @@
 package com.example.mobiilr
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
@@ -13,16 +9,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
 
 @Composable
-fun HomeScreen(onOpenDetail: () -> Unit, modifier: Modifier = Modifier) {
-    var message by remember { mutableStateOf("Hello Android!") }
-
+fun HomeScreen(
+    uiState: AppUiState,
+    onGreetClick: () -> Unit,
+    onOpenDetail: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(message)
-        Button(onClick = { message = "Hello from our app!" }) {
+        Text(uiState.message)
+        Text("Clicked ${uiState.clickCount} times")
+        Button(onClick = onGreetClick) {
             Text("Click me")
         }
         Button(onClick = onOpenDetail) {

@@ -6,7 +6,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -16,7 +19,9 @@ import androidx.navigation.compose.rememberNavController
 
 
 @Composable
-fun AppNav() {
+fun AppNav(appViewModel: AppViewModel = viewModel()) {
+    // Üks ViewModel kogu rakenduse jaoks (Activity skoobis) – kõik ekraanid näevad sama olekut.
+    val uiState by appViewModel.uiState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -44,7 +49,11 @@ fun AppNav() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") {
-                HomeScreen(onOpenDetail = { navController.navigate("detail/42") })
+                HomeScreen(
+                    uiState = uiState,
+                    onGreetClick = appViewModel::onGreetClicked,
+                    onOpenDetail = { navController.navigate("detail/42") }
+                )
             }
             composable("detail/{id}") { entry ->
                 DetailScreen(
@@ -53,7 +62,7 @@ fun AppNav() {
                 )
             }
             composable("settings") {
-                SettingsScreen()
+                SettingsScreen(uiState = uiState)
             }
         }
     }
