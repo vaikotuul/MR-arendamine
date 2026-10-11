@@ -132,8 +132,49 @@ Teine võimalus: Android Studios Run → Edit Configurations → Launch: URL ja 
 
 ## Testkeskkonnad
 
-- Virtuaalseade: Android Emulator, Medium Phone, Android 17.0, API 37
-- Füüsiline seade: Samsung Galaxy A26 (SM-A266B), Android 16, API 36
+- Virtuaalseade: Android Emulator, Pixel 10, API 37
+- Füüsiline seade: Xiaomi 15T
+
+## Ekraanipildid
+
+### Emulaator (Pixel 10, API 37)
+
+Avaekraan Android Studio Running Devices aknas:
+
+![Avaekraan emulaatoris Android Studios](../Screenshots/emulator-P10/01-home-android-studio.png)
+
+Avaekraan:
+
+![Avaekraan emulaatoris](../Screenshots/emulator-P10/02-home.png)
+
+Ühiktestide käivitamine käsuga `.\gradlew test`:
+
+![gradlew test – BUILD SUCCESSFUL](../Screenshots/emulator-P10/03-unit-tests-gradlew.png)
+
+### Füüsiline seade (Xiaomi 15T)
+
+| # | Samm | Oodatud tulemus | Tulemus |
+| --- | --- | --- | --- |
+| 1 | Käivita rakendus | Avaekraan: „Hello Android!", „Clicked 0 times" | Töötab |
+| 2 | Vajuta „Click me" mitu korda | „Hello from our app!" ja loendur kasvab | Töötab |
+| 3 | Vajuta „Open detail" | Avaneb „Detail 42" | Töötab |
+| 4 | Ava sügavlink `myapp://detail/7` | Rakendus avaneb kohe ekraanil „Detail 7" | Töötab |
+
+Avaekraan:
+
+![Avaekraan telefonis](../Screenshots/xiaomi15t/01-home.png)
+
+Pärast viit vajutust nupule „Click me":
+
+![Pärast vajutusi](../Screenshots/xiaomi15t/02-after-clicks.png)
+
+Detailvaade nupu „Open detail" kaudu:
+
+![Detail 42](../Screenshots/xiaomi15t/03-detail-42.png)
+
+Detailvaade sügavlingi `myapp://detail/7` kaudu:
+
+![Sügavlink Detail 7](../Screenshots/xiaomi15t/04-deeplink-detail-7.png)
 
 ## Probleemid ja lahendused
 
