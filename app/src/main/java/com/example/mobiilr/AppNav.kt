@@ -12,10 +12,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 
 
 @Composable
@@ -55,7 +58,12 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
                     onOpenDetail = { navController.navigate("detail/42") }
                 )
             }
-            composable("detail/{id}") { entry ->
+            // Sügavlink myapp://detail/{id} viib otse sellele ekraanile
+            composable(
+                route = "detail/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "myapp://detail/{id}" })
+            ) { entry ->
                 DetailScreen(
                     id = entry.arguments?.getString("id") ?: "",
                     onBack = { navController.popBackStack() }
