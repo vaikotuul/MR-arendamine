@@ -13,6 +13,7 @@ fun HomeScreen(
     uiState: AppUiState,
     onGreetClick: () -> Unit,
     onOpenDetail: () -> Unit,
+    onTakePhoto: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -27,6 +28,9 @@ fun HomeScreen(
         }
         Button(onClick = onOpenDetail) {
             Text("Open detail")
+        }
+        Button(onClick = onTakePhoto) {
+            Text("Take photo")
         }
     }
 }
