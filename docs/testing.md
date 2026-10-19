@@ -24,6 +24,7 @@ app/src/
 │       └── AppViewModel.kt              ← testitav ViewModel
 ├── test/java/com/example/mobiilr/
 │   ├── AppViewModelTest.kt              ← ViewModel'i ühiktestid
+│   ├── SampleSizeTest.kt                ← kaamerapildi vähendamise test (vt camera.md)
 │   └── ExampleUnitTest.kt               ← malli näidistest
 └── androidTest/java/com/example/mobiilr/
     ├── NavigationTest.kt                ← navigatsiooni ja sügavlingi UI testid

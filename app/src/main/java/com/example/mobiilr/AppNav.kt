@@ -1,5 +1,7 @@
 package com.example.mobiilr
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -7,7 +9,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import java.io.File
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -52,11 +58,27 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") {
+                // Süsteemi kaamerarakendus kirjutab täismõõdus pildi meie cache'i (üks fail, iga kord üle kirjutatud).
+                // Android võib cache'i ise tühjendada, kui ruumi napib.
+                val context = LocalContext.current
+                val photoFile = remember { File(context.cacheDir, "photo.jpg") }
+                val photoUri = remember { FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile) }
+                val takePhoto = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
+                    val bitmap = if (saved) loadPhoto(photoFile) else null
+                    if (bitmap != null) {
+                        appViewModel.onPhotoTaken(bitmap)
+                        navController.navigate("photo")
+                    }
+                }
                 HomeScreen(
                     uiState = uiState,
                     onGreetClick = appViewModel::onGreetClicked,
-                    onOpenDetail = { navController.navigate("detail/42") }
+                    onOpenDetail = { navController.navigate("detail/42") },
+                    onTakePhoto = { takePhoto.launch(photoUri) }
                 )
+            }
+            composable("photo") {
+                PhotoScreen(photo = uiState.photo, onBack = { navController.popBackStack() })
             }
             // Sügavlink myapp://detail/{id} viib otse sellele ekraanile
             composable(
