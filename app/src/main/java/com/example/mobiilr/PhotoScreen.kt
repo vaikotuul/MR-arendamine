@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 
 // Kahandab pilti 2x sammudega, kuni pikem külg mahub maxSide sisse (50MP pilt täismõõdus jooksutaks rakenduse kokku)
 fun sampleSize(width: Int, height: Int, maxSide: Int = 2048): Int {
@@ -39,7 +41,7 @@ fun loadPhoto(file: File): Bitmap? {
 }
 
 @Composable
-fun PhotoScreen(photo: Bitmap?, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun PhotoScreen(photo: Bitmap?, savedPath: String?, onBack: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -47,6 +49,10 @@ fun PhotoScreen(photo: Bitmap?, onBack: () -> Unit, modifier: Modifier = Modifie
     ) {
         if (photo != null) {
             Image(photo.asImageBitmap(), contentDescription = "Taken photo", modifier = Modifier.fillMaxWidth())
+            Text(
+                text = if (savedPath != null) "Saved to $savedPath" else "Not saved to gallery",
+                modifier = Modifier.padding(16.dp)
+            )
         } else {
             Text("No photo")
         }

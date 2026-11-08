@@ -16,5 +16,6 @@ fun SettingsScreen(uiState: AppUiState, modifier: Modifier = Modifier) {
     ) {
         Text("Settings")
         Text("Home button clicked ${uiState.clickCount} times")
+        Text("Photos saved to gallery: ${uiState.savedPhotoCount}")
     }
 }

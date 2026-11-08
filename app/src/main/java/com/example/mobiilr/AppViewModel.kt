@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.update
 data class AppUiState(
     val message: String = "Hello Android!",
     val clickCount: Int = 0,
-    val photo: Bitmap? = null
+    val photo: Bitmap? = null,
+    val savedPhotoPath: String? = null,
+    val savedPhotoCount: Int = 0
 )
 
 //Jagatud ViewModel. Olekut saab muuta ainult siin (MutableStateFlow on privaatne)
@@ -32,7 +34,13 @@ class AppViewModel : ViewModel() {
     }
 
     //Syndmus: kaamerast tuli pilt
-    fun onPhotoTaken(photo: Bitmap) {
-        _uiState.update { it.copy(photo = photo) }
+    fun onPhotoTaken(photo: Bitmap, savedPath: String? = null) {
+        _uiState.update {
+            it.copy(
+                photo = photo,
+                savedPhotoPath = savedPath,
+                savedPhotoCount = it.savedPhotoCount + if (savedPath != null) 1 else 0
+            )
+        }
     }
 }
