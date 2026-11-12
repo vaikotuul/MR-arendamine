@@ -92,7 +92,8 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
                         }
                     },
                     onOpenGallery = { navController.navigate("gallery") },
-                    onOpenAr = { navController.navigate("ar") }
+                    onOpenAr = { navController.navigate("ar") },
+                    onOpenNetwork = { navController.navigate("network") }
                 )
             }
             composable("gallery") {
@@ -125,6 +126,9 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
                         appViewModel.onNoteSaved(text)
                     }
                 )
+            }
+            composable("network") {
+                NetworkScreen(onBack = { navController.popBackStack() })
             }
         }
     }
