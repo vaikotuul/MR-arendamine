@@ -48,4 +48,29 @@ class AppViewModelTest {
         assertEquals(0, teine.uiState.value.clickCount)
         assertEquals("Hello Android!", teine.uiState.value.message)
     }
+
+    @Test
+    fun onStorageLoaded_taastabSalvestatudAndmed() {
+        viewModel.onStorageLoaded(darkTheme = true, note = "Tere")
+
+        assertEquals(true, viewModel.uiState.value.darkTheme)
+        assertEquals("Tere", viewModel.uiState.value.note)
+    }
+
+    @Test
+    fun onStorageLoaded_teistKordaEiKirjutaUle() {
+        // Ekraani pööramisel ei tohi värsket olekut üle kirjutada
+        viewModel.onStorageLoaded(darkTheme = false, note = "")
+        viewModel.onDarkThemeChanged(true)
+        viewModel.onStorageLoaded(darkTheme = false, note = "")
+
+        assertEquals(true, viewModel.uiState.value.darkTheme)
+    }
+
+    @Test
+    fun onNoteSaved_muudabMarget() {
+        viewModel.onNoteSaved("Uus märge")
+
+        assertEquals("Uus märge", viewModel.uiState.value.note)
+    }
 }

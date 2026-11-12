@@ -14,6 +14,7 @@ fun HomeScreen(
     onGreetClick: () -> Unit,
     onOpenDetail: () -> Unit,
     onTakePhoto: () -> Unit,
+    onOpenGallery: () -> Unit,
     onOpenAr: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -32,6 +33,9 @@ fun HomeScreen(
         }
         Button(onClick = onTakePhoto) {
             Text("Take photo")
+        }
+        Button(onClick = onOpenGallery) {
+            Text("Gallery")
         }
         Button(onClick = onOpenAr) {
             Text("Open AR")

@@ -10,6 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
@@ -25,7 +29,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 
 @Composable
 fun AppNav(appViewModel: AppViewModel = viewModel()) {
@@ -58,28 +64,39 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") {
-                // Süsteemi kaamerarakendus kirjutab täismõõdus pildi meie cache'i (üks fail, iga kord üle kirjutatud).
-                // Android võib cache'i ise tühjendada, kui ruumi napib.
+                // Kaamera kirjutab pildi ajutiselt cache'i, sealt kopeerime selle galeriisse (Storage.kt)
                 val context = LocalContext.current
+                val scope = rememberCoroutineScope()
                 val photoFile = remember { File(context.cacheDir, "photo.jpg") }
                 val photoUri = remember { FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile) }
-                val takePhoto = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
-                    val bitmap = if (saved) loadPhoto(photoFile) else null
-                    if (bitmap != null) {
-                        appViewModel.onPhotoTaken(bitmap)
-                        navController.navigate("photo")
+                val takePhoto = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { taken ->
+                    if (taken) scope.launch {
+                        withContext(Dispatchers.IO) { savePhoto(context, photoFile) }
+                        navController.navigate("gallery")
                     }
+                }
+                // AR-teek lisab manifesti CAMERA loa. Siis nõuab Android, et luba oleks antud
+                // ka kaamerarakenduse avamiseks – muidu SecurityException ja rakendus jookseb kokku.
+                val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+                    if (granted) takePhoto.launch(photoUri)
                 }
                 HomeScreen(
                     uiState = uiState,
                     onGreetClick = appViewModel::onGreetClicked,
                     onOpenDetail = { navController.navigate("detail/42") },
-                    onTakePhoto = { takePhoto.launch(photoUri) },
+                    onTakePhoto = {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                            takePhoto.launch(photoUri)
+                        } else {
+                            cameraPermission.launch(Manifest.permission.CAMERA)
+                        }
+                    },
+                    onOpenGallery = { navController.navigate("gallery") },
                     onOpenAr = { navController.navigate("ar") }
                 )
             }
-            composable("photo") {
-                PhotoScreen(photo = uiState.photo, onBack = { navController.popBackStack() })
+            composable("gallery") {
+                GalleryScreen(onBack = { navController.popBackStack() })
             }
             composable("ar") {
                 ArScreen(onBack = { navController.popBackStack() })
@@ -96,7 +113,18 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
                 )
             }
             composable("settings") {
-                SettingsScreen(uiState = uiState)
+                val context = LocalContext.current
+                SettingsScreen(
+                    uiState = uiState,
+                    onDarkThemeChange = { dark ->
+                        saveDarkTheme(context, dark)
+                        appViewModel.onDarkThemeChanged(dark)
+                    },
+                    onSaveNote = { text ->
+                        saveNote(context, text)
+                        appViewModel.onNoteSaved(text)
+                    }
+                )
             }
         }
     }
