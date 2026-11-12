@@ -10,6 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
@@ -26,13 +30,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Composable
 fun AppNav(appViewModel: AppViewModel = viewModel()) {
@@ -65,49 +64,39 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") {
-                // Kaamera kirjutab pildi ajutiselt cache'i, sealt kopeerime selle galeriisse (PhotoStorage.kt)
+                // Kaamera kirjutab pildi ajutiselt cache'i, sealt kopeerime selle galeriisse (Storage.kt)
                 val context = LocalContext.current
                 val scope = rememberCoroutineScope()
                 val photoFile = remember { File(context.cacheDir, "photo.jpg") }
                 val photoUri = remember { FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile) }
                 val takePhoto = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { taken ->
-                    if (!taken) return@rememberLauncherForActivityResult
-                    scope.launch {
-                        // Taustalõimes, et ekraan ei jääks seisma
-                        val (bitmap, saved) = withContext(Dispatchers.IO) {
-                            val canSave = !needsStoragePermission() || context.hasStoragePermission()
-                            loadPhoto(photoFile) to (if (canSave) savePhotoToGallery(context, photoFile) else null)
-                        }
-                        if (bitmap != null) {
-                            appViewModel.onPhotoTaken(bitmap, saved?.path)
-                            navController.navigate("photo")
-                        }
+                    if (taken) scope.launch {
+                        withContext(Dispatchers.IO) { savePhoto(context, photoFile) }
+                        navController.navigate("gallery")
                     }
                 }
-                // Android 7–9 vajab luba. Keeldumisel pildistame ikka, aga pilt jääb ainult cache'i.
-                val storagePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-                    takePhoto.launch(photoUri)
+                // AR-teek lisab manifesti CAMERA loa. Siis nõuab Android, et luba oleks antud
+                // ka kaamerarakenduse avamiseks – muidu SecurityException ja rakendus jookseb kokku.
+                val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+                    if (granted) takePhoto.launch(photoUri)
                 }
                 HomeScreen(
                     uiState = uiState,
                     onGreetClick = appViewModel::onGreetClicked,
                     onOpenDetail = { navController.navigate("detail/42") },
                     onTakePhoto = {
-                        if (needsStoragePermission() && !context.hasStoragePermission()) {
-                            storagePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        } else {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                             takePhoto.launch(photoUri)
+                        } else {
+                            cameraPermission.launch(Manifest.permission.CAMERA)
                         }
                     },
+                    onOpenGallery = { navController.navigate("gallery") },
                     onOpenAr = { navController.navigate("ar") }
                 )
             }
-            composable("photo") {
-                PhotoScreen(
-                    photo = uiState.photo,
-                    savedPath = uiState.savedPhotoPath,
-                    onBack = { navController.popBackStack() }
-                )
+            composable("gallery") {
+                GalleryScreen(onBack = { navController.popBackStack() })
             }
             composable("ar") {
                 ArScreen(onBack = { navController.popBackStack() })
@@ -124,7 +113,18 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
                 )
             }
             composable("settings") {
-                SettingsScreen(uiState = uiState)
+                val context = LocalContext.current
+                SettingsScreen(
+                    uiState = uiState,
+                    onDarkThemeChange = { dark ->
+                        saveDarkTheme(context, dark)
+                        appViewModel.onDarkThemeChanged(dark)
+                    },
+                    onSaveNote = { text ->
+                        saveNote(context, text)
+                        appViewModel.onNoteSaved(text)
+                    }
+                )
             }
         }
     }
@@ -135,6 +135,3 @@ private fun NavController.goTab(r: String) = navigate(r) {
     launchSingleTop = true
     restoreState = true
 }
-
-private fun Context.hasStoragePermission(): Boolean =
-    ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
