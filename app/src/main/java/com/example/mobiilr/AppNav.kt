@@ -98,7 +98,8 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
                         } else {
                             takePhoto.launch(photoUri)
                         }
-                    }
+                    },
+                    onOpenAr = { navController.navigate("ar") }
                 )
             }
             composable("photo") {
@@ -107,6 +108,9 @@ fun AppNav(appViewModel: AppViewModel = viewModel()) {
                     savedPath = uiState.savedPhotoPath,
                     onBack = { navController.popBackStack() }
                 )
+            }
+            composable("ar") {
+                ArScreen(onBack = { navController.popBackStack() })
             }
             // Sügavlink myapp://detail/{id} viib otse sellele ekraanile
             composable(
